@@ -11,10 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-@RequiredArgsConstructor
 public class TransacaoServiceImpl implements TransacaoService {
 
     private final CartaoRepository cartaoRepository;
+
+    public TransacaoServiceImpl(CartaoRepository cartaoRepository) {
+        this.cartaoRepository = cartaoRepository;
+    }
 
     public String processTransaction(TransacaoDTO transacao) {
         // Buscar o cartão no banco

@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/transacoes")
-@RequiredArgsConstructor
 public class TransacaoController {
 
     private final TransacaoService transacaoService;
+
+    public TransacaoController(TransacaoService transacaoService) {
+        this.transacaoService = transacaoService;
+    }
 
     @PostMapping
     public ResponseEntity<String> realizarTransacao(@RequestBody TransacaoDTO transacao) {
