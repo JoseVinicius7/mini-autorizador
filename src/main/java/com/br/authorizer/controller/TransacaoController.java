@@ -1,9 +1,9 @@
 package com.br.authorizer.controller;
 
+import com.br.authorizer.dto.CartaoDTO;
+import com.br.authorizer.dto.CartaoResponseDTO;
 import com.br.authorizer.dto.TransacaoDTO;
-import com.br.authorizer.service.CartaoService;
 import com.br.authorizer.service.TransacaoService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

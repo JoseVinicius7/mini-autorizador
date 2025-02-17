@@ -1,13 +1,12 @@
 package com.br.authorizer.service;
 
-import com.br.authorizer.entity.CartaoEntity;
-
-import java.math.BigDecimal;
+import com.br.authorizer.dto.CartaoDTO;
+import com.br.authorizer.dto.CartaoResponseDTO;
 
 public interface CartaoService {
 
-    public CartaoEntity createCartao(CartaoEntity cartao);
+    CartaoResponseDTO createCartao(CartaoDTO cartao);
 
-    public BigDecimal getBalance(String numeroCartao);
+    CartaoResponseDTO getBalance(String numeroCartao);
 
 }

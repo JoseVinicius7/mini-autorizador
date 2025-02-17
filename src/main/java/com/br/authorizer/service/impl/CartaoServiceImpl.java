@@ -1,13 +1,15 @@
 package com.br.authorizer.service.impl;
 
+import com.br.authorizer.dto.CartaoDTO;
+import com.br.authorizer.dto.CartaoResponseDTO;
 import com.br.authorizer.entity.CartaoEntity;
+import com.br.authorizer.factory.CartaoFactory;
 import com.br.authorizer.repository.CartaoRepository;
 import com.br.authorizer.service.CartaoService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.math.BigDecimal;
 
 @Service
 public class CartaoServiceImpl implements CartaoService {
@@ -18,14 +20,18 @@ public class CartaoServiceImpl implements CartaoService {
         this.cartaoRepository = cartaoRepository;
     }
 
-    public CartaoEntity createCartao(CartaoEntity cartao) {
-        return cartaoRepository.findById(cartao.getNumeroCartao()).orElseGet(() -> cartaoRepository.save(cartao));
+    @Transactional
+    public CartaoResponseDTO createCartao(CartaoDTO cartaoDTO) {
+        CartaoEntity cartao = cartaoRepository.findById(cartaoDTO.getNumeroCartao())
+                .orElseGet(() -> cartaoRepository.save(CartaoFactory.criarCartao(cartaoDTO)));
+
+        return new CartaoResponseDTO(cartao.getNumeroCartao(), cartao.getSaldo());
     }
 
-    public BigDecimal getBalance(String numeroCartao) {
-        return cartaoRepository.findById(numeroCartao)
-                .map(CartaoEntity::getSaldo)
+    public CartaoResponseDTO getBalance(String numeroCartao) {
+        CartaoEntity cartao = cartaoRepository.findById(numeroCartao)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
 
+        return new CartaoResponseDTO(cartao.getNumeroCartao(), cartao.getSaldo());
+    }
 }

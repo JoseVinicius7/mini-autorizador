@@ -1,6 +1,5 @@
 package com.br.authorizer.service.impl;
 
-
 import com.br.authorizer.dto.TransacaoDTO;
 import com.br.authorizer.entity.CartaoEntity;
 import com.br.authorizer.repository.CartaoRepository;
@@ -8,6 +7,7 @@ import com.br.authorizer.service.TransacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -19,23 +19,20 @@ public class TransacaoServiceImpl implements TransacaoService {
         this.cartaoRepository = cartaoRepository;
     }
 
-    public String processTransaction(TransacaoDTO transacao) {
-        // Buscar o cartão no banco
-        CartaoEntity cartao = cartaoRepository.findById(transacao.getNumeroCartao())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "CARTAO_INEXISTENTE"));
+    @Transactional
+    public String processTransaction(TransacaoDTO transacaoDTO) {
+        CartaoEntity cartao = cartaoRepository.findById(transacaoDTO.getNumeroCartao())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cartão não encontrado"));
 
-        // Verificar se a senha está correta
-        if (!cartao.getSenha().equals(transacao.getSenhaCartao())) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "SENHA_INVALIDA");
+        if (!cartao.getSenha().equals(transacaoDTO.getSenhaCartao())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Senha inválida");
         }
 
-        // Verificar se o saldo é suficiente
-        if (cartao.getSaldo().compareTo(transacao.getValor()) < 0) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "SALDO_INSUFICIENTE");
+        if (cartao.getSaldo().compareTo(transacaoDTO.getValor()) < 0) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Saldo insuficiente");
         }
 
-        // Realizar o débito e salvar no banco
-        cartao.setSaldo(cartao.getSaldo().subtract(transacao.getValor()));
+        cartao.setSaldo(cartao.getSaldo().subtract(transacaoDTO.getValor()));
         cartaoRepository.save(cartao);
 
         return "OK";

@@ -4,15 +4,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "cartoes")
-@AllArgsConstructor
-@NoArgsConstructor
 public class CartaoEntity {
 
     @Id
@@ -24,6 +20,15 @@ public class CartaoEntity {
 
     @Column(nullable = false)
     private BigDecimal saldo;
+
+    public CartaoEntity(String numeroCartao, String senha, BigDecimal saldo) {
+        this.numeroCartao = numeroCartao;
+        this.senha = senha;
+        this.saldo = saldo;
+    }
+
+    public CartaoEntity() {
+    }
 
     public BigDecimal getSaldo() {
         return saldo;

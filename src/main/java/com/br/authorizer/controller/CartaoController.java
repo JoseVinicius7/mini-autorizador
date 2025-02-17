@@ -1,5 +1,7 @@
 package com.br.authorizer.controller;
 
+import com.br.authorizer.dto.CartaoDTO;
+import com.br.authorizer.dto.CartaoResponseDTO;
 import com.br.authorizer.entity.CartaoEntity;
 import com.br.authorizer.service.CartaoService;
 import org.springframework.http.HttpStatus;
@@ -19,12 +21,12 @@ public class CartaoController {
     }
 
     @PostMapping
-    public ResponseEntity<CartaoEntity> criarCartao(@RequestBody CartaoEntity cartao) {
+    public ResponseEntity<CartaoResponseDTO> criarCartao(@RequestBody CartaoDTO cartao) {
         return ResponseEntity.status(HttpStatus.CREATED).body(cartaoService.createCartao(cartao));
     }
 
     @GetMapping("/{numeroCartao}")
-    public ResponseEntity<BigDecimal> obterSaldo(@PathVariable String numeroCartao) {
+    public ResponseEntity<CartaoResponseDTO> obterSaldo(@PathVariable String numeroCartao) {
         return ResponseEntity.ok(cartaoService.getBalance(numeroCartao));
     }
 }

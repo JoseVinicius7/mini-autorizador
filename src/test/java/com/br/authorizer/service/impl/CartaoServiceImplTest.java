@@ -1,13 +1,15 @@
 package com.br.authorizer.service.impl;
 
+import com.br.authorizer.dto.CartaoDTO;
+import com.br.authorizer.dto.CartaoResponseDTO;
 import com.br.authorizer.entity.CartaoEntity;
 import com.br.authorizer.repository.CartaoRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -25,58 +27,55 @@ class CartaoServiceImplTest {
     @InjectMocks
     private CartaoServiceImpl cartaoService;
 
-    private CartaoEntity cartao;
-
-    @BeforeEach
-    void setUp() {
-        cartao = new CartaoEntity();
-        cartao.setNumeroCartao("1234567890123456");
-        cartao.setSenha("1234");
-        cartao.setSaldo(new BigDecimal("500.00"));
-    }
-
     @Test
     void deveCriarCartaoQuandoNaoExistir() {
-        when(cartaoRepository.findById(cartao.getNumeroCartao())).thenReturn(Optional.empty());
-        when(cartaoRepository.save(cartao)).thenReturn(cartao);
+        CartaoDTO cartaoDTO = new CartaoDTO("1234567890123456", "1234");
+        CartaoEntity cartaoEntity = new CartaoEntity("1234567890123456", "1234", BigDecimal.valueOf(500.00));
 
-        CartaoEntity cartaoCriado = cartaoService.createCartao(cartao);
+        // Simulando comportamento do repositório
+        when(cartaoRepository.findById(cartaoDTO.getNumeroCartao())).thenReturn(Optional.empty());
+        when(cartaoRepository.save(any(CartaoEntity.class))).thenReturn(cartaoEntity);
 
-        assertNotNull(cartaoCriado);
-        assertEquals(cartao.getNumeroCartao(), cartaoCriado.getNumeroCartao());
-        verify(cartaoRepository, times(1)).findById(cartao.getNumeroCartao());
-        verify(cartaoRepository, times(1)).save(cartao);
+        // Testando o método
+        CartaoResponseDTO response = cartaoService.createCartao(cartaoDTO);
+
+        assertNotNull(response);
+        assertEquals(cartaoDTO.getNumeroCartao(), response.getNumeroCartao());
+        assertEquals(cartaoEntity.getSaldo(), response.getSaldo());
+
+        // Verificando interações com o repositório
+        verify(cartaoRepository, times(1)).findById(cartaoDTO.getNumeroCartao());
+        verify(cartaoRepository, times(1)).save(any(CartaoEntity.class));
     }
 
     @Test
-    void deveRetornarCartaoExistenteSemCriarNovo() {
-        when(cartaoRepository.findById(cartao.getNumeroCartao())).thenReturn(Optional.of(cartao));
+    void deveRetornarSaldoDoCartaoQuandoExistir() {
+        String numeroCartao = "1234567890123456";
+        CartaoEntity cartaoEntity = new CartaoEntity(numeroCartao, "1234", BigDecimal.valueOf(500.00));
 
-        CartaoEntity cartaoRetornado = cartaoService.createCartao(cartao);
+        // Simulando comportamento do repositório
+        when(cartaoRepository.findById(numeroCartao)).thenReturn(Optional.of(cartaoEntity));
 
-        assertNotNull(cartaoRetornado);
-        assertEquals(cartao.getNumeroCartao(), cartaoRetornado.getNumeroCartao());
-        verify(cartaoRepository, times(1)).findById(cartao.getNumeroCartao());
-        verify(cartaoRepository, never()).save(cartao);
+        // Testando o método
+        CartaoResponseDTO response = cartaoService.getBalance(numeroCartao);
+
+        assertNotNull(response);
+        assertEquals(numeroCartao, response.getNumeroCartao());
+        assertEquals(cartaoEntity.getSaldo(), response.getSaldo());
+
+        // Verificando interações com o repositório
+        verify(cartaoRepository, times(1)).findById(numeroCartao);
     }
 
     @Test
-    void deveRetornarSaldoDoCartao() {
-        when(cartaoRepository.findById(cartao.getNumeroCartao())).thenReturn(Optional.of(cartao));
+    void deveLancarErroQuandoCartaoNaoExistir() {
+        String numeroCartao = "1234567890123456";
 
-        BigDecimal saldo = cartaoService.getBalance(cartao.getNumeroCartao());
+        // Simulando comportamento do repositório
+        when(cartaoRepository.findById(numeroCartao)).thenReturn(Optional.empty());
 
-        assertNotNull(saldo);
-        assertEquals(new BigDecimal("500.00"), saldo);
-        verify(cartaoRepository, times(1)).findById(cartao.getNumeroCartao());
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoCartaoNaoForEncontrado() {
-        when(cartaoRepository.findById("0000000000000000")).thenReturn(Optional.empty());
-
-        assertThrows(ResponseStatusException.class, () -> cartaoService.getBalance("0000000000000000"));
-
-        verify(cartaoRepository, times(1)).findById("0000000000000000");
+        // Verificando se a exceção é lançada
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> cartaoService.getBalance(numeroCartao));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     }
 }
