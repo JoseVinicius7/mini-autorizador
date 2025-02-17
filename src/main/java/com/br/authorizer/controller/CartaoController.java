@@ -18,12 +18,12 @@ public class CartaoController {
 
     @PostMapping
     public ResponseEntity<CartaoEntity> criarCartao(@RequestBody CartaoEntity cartao) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cartaoService.criarCartao(cartao));
+        return ResponseEntity.status(HttpStatus.CREATED).body(cartaoService.createCartao(cartao));
     }
 
     @GetMapping("/{numeroCartao}")
     public ResponseEntity<BigDecimal> obterSaldo(@PathVariable String numeroCartao) {
-        return ResponseEntity.ok(cartaoService.obterSaldo(numeroCartao));
+        return ResponseEntity.ok(cartaoService.getBalance(numeroCartao));
     }
 }
 
