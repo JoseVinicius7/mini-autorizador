@@ -1,4 +1,4 @@
-package com.br.authorizer.service;
+package com.br.authorizer.service.impl;
 
 import com.br.authorizer.dto.TransacaoDTO;
 import com.br.authorizer.entity.CartaoEntity;
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -40,9 +41,9 @@ class TransacaoServiceImplTest {
         when(cartaoRepository.findById("1234567890123456")).thenReturn(Optional.of(cartao));
         when(cartaoRepository.save(any())).thenReturn(cartao);
 
-        String resultado = transacaoService.processTransaction(transacao);
+        ResponseEntity<String> response = transacaoService.processTransaction(transacao);
 
-        assertEquals("OK", resultado);
+        assertEquals("OK", response);
 
         verify(cartaoRepository, times(1)).findById("1234567890123456");
         verify(cartaoRepository, times(1)).save(any());

@@ -9,6 +9,9 @@ public class CartaoFactory {
 
     private static final BigDecimal SALDO_INICIAL = BigDecimal.valueOf(500.00);
 
+    private CartaoFactory() {
+    }
+
     public static CartaoEntity criarCartao(CartaoDTO dto) {
         return new CartaoEntity(dto.getNumeroCartao(), dto.getSenha(), SALDO_INICIAL);
     }

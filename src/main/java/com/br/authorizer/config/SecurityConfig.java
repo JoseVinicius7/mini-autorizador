@@ -38,7 +38,7 @@ public class SecurityConfig {
         // Simulando um usuário fictício
         return new InMemoryUserDetailsManager(
                 User.withUsername("user")
-                        .password("{noop}password") // No encoding de senha
+                        .password("{noop}password")
                         .roles("USER")
                         .build()
         );

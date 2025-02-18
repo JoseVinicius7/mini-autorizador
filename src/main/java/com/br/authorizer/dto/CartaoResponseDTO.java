@@ -13,16 +13,8 @@ public class CartaoResponseDTO {
         return numeroCartao;
     }
 
-    public void setNumeroCartao(String numeroCartao) {
-        this.numeroCartao = numeroCartao;
-    }
-
     public BigDecimal getSaldo() {
         return saldo;
-    }
-
-    public void setSaldo(BigDecimal saldo) {
-        this.saldo = saldo;
     }
 
     private String numeroCartao;

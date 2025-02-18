@@ -24,10 +24,6 @@ public class TransacaoDTO {
         return senhaCartao;
     }
 
-    public void setSenhaCartao(String senhaCartao) {
-        this.senhaCartao = senhaCartao;
-    }
-
     public BigDecimal getValor() {
         return valor;
     }

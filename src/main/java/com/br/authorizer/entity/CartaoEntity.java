@@ -1,5 +1,6 @@
 package com.br.authorizer.entity;
 
+import com.br.authorizer.handler.exception.SaldoInsuficienteException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -52,5 +53,14 @@ public class CartaoEntity {
 
     public void setNumeroCartao(String numeroCartao) {
         this.numeroCartao = numeroCartao;
+    }
+
+
+    public void debitarSaldo(BigDecimal valor) {
+        if (this.saldo.compareTo(valor) < 0) {
+            throw new SaldoInsuficienteException();
+        }
+
+        this.saldo = this.saldo.subtract(valor);
     }
 }
