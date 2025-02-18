@@ -3,6 +3,7 @@ package com.br.authorizer.service.impl;
 import com.br.authorizer.dto.CartaoDTO;
 import com.br.authorizer.dto.CartaoResponseDTO;
 import com.br.authorizer.entity.CartaoEntity;
+import com.br.authorizer.handler.exception.CartaoDuplicadoException;
 import com.br.authorizer.handler.exception.CartaoNaoEncontradoException;
 import com.br.authorizer.repository.CartaoRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +56,7 @@ class CartaoServiceImplTest {
     void testCreateCartao_CartaoJaExistente() {
         when(cartaoRepository.existsById(cartaoDTO.getNumeroCartao())).thenReturn(true);
 
-        assertThrows(ResponseStatusException.class, () -> cartaoService.createCartao(cartaoDTO));
+        assertThrows(CartaoDuplicadoException.class, () -> cartaoService.createCartao(cartaoDTO));
 
         verify(cartaoRepository, never()).save(any(CartaoEntity.class));
     }
