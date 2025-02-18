@@ -2,22 +2,25 @@ package com.br.authorizer.service.impl;
 
 import com.br.authorizer.dto.TransacaoDTO;
 import com.br.authorizer.entity.CartaoEntity;
+import com.br.authorizer.handler.exception.CartaoInexistenteException;
+import com.br.authorizer.handler.exception.SaldoInsuficienteException;
+import com.br.authorizer.handler.exception.SenhaInvalidaException;
 import com.br.authorizer.repository.CartaoRepository;
-import com.br.authorizer.service.impl.TransacaoServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class TransacaoServiceImplTest {
 
     @Mock
@@ -26,26 +29,61 @@ class TransacaoServiceImplTest {
     @InjectMocks
     private TransacaoServiceImpl transacaoService;
 
+    private TransacaoDTO transacaoDTO;
+    private CartaoEntity cartaoEntity;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        transacaoDTO = new TransacaoDTO("1234567890123456", "1234", new BigDecimal("50.00"));
+        cartaoEntity = new CartaoEntity("1234567890123456", "1234", new BigDecimal("100.00"));
+    }
+
     @Test
-    void deveRealizarTransacaoComSucesso() {
-        CartaoEntity cartao = new CartaoEntity();
-        cartao.setNumeroCartao("1234567890123456");
-        cartao.setSenha("1234");
-        cartao.setSaldo(new BigDecimal("500.00"));
+    void testProcessTransaction_Success() {
+        when(cartaoRepository.findByNumeroCartaoComLock(transacaoDTO.getNumeroCartao())).thenReturn(Optional.of(cartaoEntity));
 
-        TransacaoDTO transacao = new TransacaoDTO();
-        transacao.setNumeroCartao("1234567890123456");
-        transacao.setSenhaCartao("1234");
-        transacao.setValor(new BigDecimal("100.00"));
+        ResponseEntity<String> response = transacaoService.processTransaction(transacaoDTO);
 
-        when(cartaoRepository.findById("1234567890123456")).thenReturn(Optional.of(cartao));
-        when(cartaoRepository.save(any())).thenReturn(cartao);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("Transação realizada com sucesso!", response.getBody());
 
-        ResponseEntity<String> response = transacaoService.processTransaction(transacao);
+        verify(cartaoRepository, times(1)).save(any(CartaoEntity.class));
+    }
 
-        assertEquals("OK", response);
+    @Test
+    void testProcessTransaction_CartaoInexistente() {
+        when(cartaoRepository.findByNumeroCartaoComLock(transacaoDTO.getNumeroCartao())).thenReturn(Optional.empty());
 
-        verify(cartaoRepository, times(1)).findById("1234567890123456");
-        verify(cartaoRepository, times(1)).save(any());
+        assertThrows(CartaoInexistenteException.class, () -> {
+            transacaoService.processTransaction(transacaoDTO);
+        });
+
+        verify(cartaoRepository, times(0)).save(any(CartaoEntity.class));
+    }
+
+    @Test
+    void testProcessTransaction_SenhaInvalida() {
+        cartaoEntity.setSenha("wrongpassword");
+        when(cartaoRepository.findByNumeroCartaoComLock(transacaoDTO.getNumeroCartao())).thenReturn(Optional.of(cartaoEntity));
+
+        assertThrows(SenhaInvalidaException.class, () -> {
+            transacaoService.processTransaction(transacaoDTO);
+        });
+
+        verify(cartaoRepository, times(0)).save(any(CartaoEntity.class));
+    }
+
+    @Test
+    void testProcessTransaction_SaldoInsuficiente() {
+        transacaoDTO.setValor(new BigDecimal("200.00"));
+        when(cartaoRepository.findByNumeroCartaoComLock(transacaoDTO.getNumeroCartao())).thenReturn(Optional.of(cartaoEntity));
+
+        assertThrows(SaldoInsuficienteException.class, () -> {
+            transacaoService.processTransaction(transacaoDTO);
+        });
+
+        verify(cartaoRepository, times(0)).save(any(CartaoEntity.class));
     }
 }
