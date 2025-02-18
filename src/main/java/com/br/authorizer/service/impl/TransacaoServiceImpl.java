@@ -4,7 +4,6 @@ import com.br.authorizer.dto.TransacaoDTO;
 import com.br.authorizer.entity.CartaoEntity;
 import com.br.authorizer.repository.CartaoRepository;
 import com.br.authorizer.service.TransacaoService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

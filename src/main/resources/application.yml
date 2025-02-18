@@ -1,20 +1,42 @@
 spring:
-    application:
-        name: authorizer
+  application:
+    name: authorizer
 
-    datasource:
-        url: jdbc:mysql://localhost:3306/miniautorizador?useSSL=false&serverTimezone=UTC
-        username: root
-        password:
-        driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource:
+    url: jdbc:mysql://localhost:3306/miniautorizador?useSSL=false&serverTimezone=UTC
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
-    jpa:
-        database-platform: org.hibernate.dialect.MySQLDialect
-        hibernate:
-            ddl-auto: update
-        show-sql: true
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
-    data:
-        mongodb:
-            uri: mongodb://user:password@localhost:27017/miniautorizador
-            database: miniautorizador
+  data:
+    mongodb:
+      uri: mongodb://user:password@localhost:27017/miniautorizador
+      database: miniautorizador
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            scope:
+              - openid
+              - profile
+              - email
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            client-name: Google
+
+
+logging:
+  level:
+    org.springframework.security: TRACE
