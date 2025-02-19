@@ -37,7 +37,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         // Simulando um usuário fictício
         return new InMemoryUserDetailsManager(
-                User.withUsername("user")
+                User.withUsername("username")
                         .password("{noop}password")
                         .roles("USER")
                         .build()
